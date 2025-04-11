@@ -9,10 +9,17 @@ export const getPhotos = async (nameFilter?: string): Promise<Photo[]> => {
     const response = await fetch(`${API_URL}/gallery${query}`, {
       method: 'GET',
       credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      },
+      mode: 'cors'
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch photos');
+      const errorText = await response.text();
+      console.error('Server response:', response.status, errorText);
+      throw new Error(`Failed to fetch photos: ${response.status}`);
     }
 
     const data = await response.json();
@@ -67,10 +74,17 @@ export const uploadPhoto = async (
       method: 'POST',
       body: formData,
       credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      },
+      mode: 'cors'
     });
 
     if (!response.ok) {
-      throw new Error('Failed to upload photo');
+      const errorText = await response.text();
+      console.error('Server response:', response.status, errorText);
+      throw new Error(`Failed to upload photo: ${response.status}`);
     }
 
     const data = await response.json();
@@ -96,16 +110,21 @@ export const uploadBase64Photo = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': window.location.origin
       },
       body: JSON.stringify({ 
         imageData, 
         uploaderName 
       }),
       credentials: 'include',
+      mode: 'cors'
     });
 
     if (!response.ok) {
-      throw new Error('Failed to upload photo');
+      const errorText = await response.text();
+      console.error('Server response:', response.status, errorText);
+      throw new Error(`Failed to upload photo: ${response.status}`);
     }
 
     const data = await response.json();
