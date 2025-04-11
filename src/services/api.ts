@@ -41,10 +41,17 @@ export const getUserPhotos = async (uploaderName: string): Promise<Photo[]> => {
     const response = await fetch(`${API_URL}/gallery/user/${encodeURIComponent(uploaderName)}`, {
       method: 'GET',
       credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      },
+      mode: 'cors'
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch user photos');
+      const errorText = await response.text();
+      console.error('Server response:', response.status, errorText);
+      throw new Error(`Failed to fetch user photos: ${response.status}`);
     }
 
     const data = await response.json();
@@ -147,10 +154,18 @@ export const adminLogin = async (password: string): Promise<boolean> => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': window.location.origin
       },
       body: JSON.stringify({ password }),
       credentials: 'include',
+      mode: 'cors'
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Server login response:', response.status, errorText);
+    }
 
     return response.ok;
   } catch (error) {
@@ -165,7 +180,17 @@ export const adminLogout = async (): Promise<boolean> => {
     const response = await fetch(`${API_URL}/admin/logout`, {
       method: 'POST',
       credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      },
+      mode: 'cors'
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Server logout response:', response.status, errorText);
+    }
 
     return response.ok;
   } catch (error) {
@@ -180,10 +205,17 @@ export const getAdminPhotos = async (): Promise<Photo[]> => {
     const response = await fetch(`${API_URL}/admin/uploads`, {
       method: 'GET',
       credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      },
+      mode: 'cors'
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch photos');
+      const errorText = await response.text();
+      console.error('Server admin photos response:', response.status, errorText);
+      throw new Error(`Failed to fetch photos: ${response.status}`);
     }
 
     const data = await response.json();
@@ -205,7 +237,17 @@ export const deletePhoto = async (id: string): Promise<boolean> => {
     const response = await fetch(`${API_URL}/admin/delete/${id}`, {
       method: 'DELETE',
       credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      },
+      mode: 'cors'
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Server delete response:', response.status, errorText);
+    }
 
     return response.ok;
   } catch (error) {
