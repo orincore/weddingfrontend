@@ -35,11 +35,15 @@ export const useAuthStore = create<AuthState>()(
           console.log('Logout success - Updated auth state:', { isAdmin: false });
         } catch (error) {
           console.error('Logout error:', error);
+          // Even if the API call fails, clear the local state
+          set({ isAdmin: false });
         }
       },
     }),
     {
       name: 'admin-auth-storage',
+      // Don't restore isAdmin state from localStorage to prevent auto-login
+      partialize: () => ({ isAdmin: false }),
     }
   )
 );
