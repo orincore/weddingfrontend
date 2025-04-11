@@ -165,11 +165,18 @@ export const adminLogin = async (password: string): Promise<boolean> => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Server login response:', response.status, errorText);
+      // Clear password from storage on failed login
+      localStorage.removeItem('adminPassword');
+    } else {
+      // Store password in localStorage for query param auth fallback
+      localStorage.setItem('adminPassword', password);
     }
 
     return response.ok;
   } catch (error) {
     console.error('Error logging in:', error);
+    // Clear password from storage on error
+    localStorage.removeItem('adminPassword');
     return false;
   }
 };
@@ -202,7 +209,13 @@ export const adminLogout = async (): Promise<boolean> => {
 // Admin service - get all uploads
 export const getAdminPhotos = async (): Promise<Photo[]> => {
   try {
-    const response = await fetch(`${API_URL}/admin/uploads`, {
+    // Get admin password from localStorage if it exists
+    const adminPassword = localStorage.getItem('adminPassword');
+    
+    // Append adminKey to URL if available
+    const queryParam = adminPassword ? `?adminKey=${encodeURIComponent(adminPassword)}` : '';
+    
+    const response = await fetch(`${API_URL}/admin/uploads${queryParam}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -234,7 +247,13 @@ export const getAdminPhotos = async (): Promise<Photo[]> => {
 // Admin service - delete photo
 export const deletePhoto = async (id: string): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_URL}/admin/delete/${id}`, {
+    // Get admin password from localStorage if it exists
+    const adminPassword = localStorage.getItem('adminPassword');
+    
+    // Append adminKey to URL if available
+    const queryParam = adminPassword ? `?adminKey=${encodeURIComponent(adminPassword)}` : '';
+    
+    const response = await fetch(`${API_URL}/admin/delete/${id}${queryParam}`, {
       method: 'DELETE',
       credentials: 'include',
       headers: {
