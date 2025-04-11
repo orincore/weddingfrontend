@@ -184,6 +184,9 @@ export const adminLogin = async (password: string): Promise<boolean> => {
 // Admin service - logout
 export const adminLogout = async (): Promise<boolean> => {
   try {
+    // Clear the password from localStorage on logout
+    localStorage.removeItem('adminPassword');
+    
     const response = await fetch(`${API_URL}/admin/logout`, {
       method: 'POST',
       credentials: 'include',
