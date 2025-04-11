@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { AuthState, PhotoStore, Photo } from './types';
 import { 
   adminLogin as apiLogin, 
@@ -8,20 +9,40 @@ import {
   getUserPhotos as apiGetUserPhotos 
 } from './services/api';
 
-export const useAuthStore = create<AuthState>((set) => ({
-  isAdmin: false,
-  login: async (password: string) => {
-    const success = await apiLogin(password);
-    if (success) {
-      set({ isAdmin: true });
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      isAdmin: false,
+      login: async (password: string) => {
+        try {
+          const success = await apiLogin(password);
+          if (success) {
+            set({ isAdmin: true });
+            console.log('Login success - Updated auth state:', { isAdmin: true });
+          } else {
+            console.log('Login failed - Auth state unchanged');
+          }
+          return success;
+        } catch (error) {
+          console.error('Login error:', error);
+          return false;
+        }
+      },
+      logout: async () => {
+        try {
+          await apiLogout();
+          set({ isAdmin: false });
+          console.log('Logout success - Updated auth state:', { isAdmin: false });
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
+      },
+    }),
+    {
+      name: 'admin-auth-storage',
     }
-    return success;
-  },
-  logout: async () => {
-    await apiLogout();
-    set({ isAdmin: false });
-  },
-}));
+  )
+);
 
 export const usePhotoStore = create<PhotoStore>((set) => ({
   photos: [],
