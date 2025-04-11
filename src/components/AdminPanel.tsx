@@ -22,17 +22,17 @@ export function AdminPanel() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAdminPhotos();
-  }, []);
+    // Only fetch admin photos if user is authenticated
+    if (isAdmin) {
+      fetchAdminPhotos();
+    }
+  }, [isAdmin]);
 
   const fetchAdminPhotos = async () => {
     setIsLoading(true);
     try {
       const photos = await getAdminPhotos();
       setAdminPhotos(photos);
-      if (photos.length > 0) {
-        useAuthStore.getState().login('admin@123');
-      }
     } catch (error) {
       console.error('Error fetching admin photos:', error);
       toast.error('Failed to load photos');
@@ -208,7 +208,96 @@ export function AdminPanel() {
     }
   };
 
-  // Always render the admin panel content, regardless of auth status
+  // Check if user is authenticated
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-rose-50 to-pink-50 px-3 py-6 sm:p-6 relative">
+        {/* Decorative elements */}
+        <div className="absolute top-10 left-10 text-rose-300 opacity-30 hidden md:block">
+          <Heart size={40} fill="currentColor" />
+        </div>
+        <div className="absolute bottom-10 right-10 text-rose-300 opacity-30 hidden md:block">
+          <Heart size={30} fill="currentColor" />
+        </div>
+        <div className="absolute top-1/4 right-[10%] text-rose-300 opacity-20 hidden lg:block">
+          <Heart size={24} fill="currentColor" />
+        </div>
+        
+        <div className="flex items-center justify-center h-full mb-24">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-rose-100 backdrop-blur-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-rose-50/40 to-pink-50/40 pointer-events-none"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-3">
+                <Heart size={28} className="text-rose-500 mr-3 animate-pulse" fill="currentColor" />
+                <h1 className="text-3xl font-serif text-rose-600 text-center font-semibold">Admin Access</h1>
+                <Heart size={28} className="text-rose-500 ml-3 animate-pulse" fill="currentColor" />
+              </div>
+              <div className="w-32 h-1 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full mx-auto mb-8"></div>
+              
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-5 py-4 border border-rose-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all duration-300 shadow-sm placeholder-gray-400"
+                      placeholder="Enter admin password"
+                      required
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-rose-100/20 to-pink-100/20 rounded-xl pointer-events-none"></div>
+                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 text-rose-400 h-5 w-5" />
+                  </div>
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-4 px-6 rounded-xl hover:from-rose-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg font-medium disabled:opacity-70 flex items-center justify-center"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      <span>Logging in...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-5 h-5 mr-2" />
+                      <span>Access Admin Panel</span>
+                    </>
+                  )}
+                </button>
+              </form>
+              
+              <div className="mt-8 text-center">
+                <p className="text-sm text-gray-500">
+                  This area is restricted to authorized personnel.
+                </p>
+                <div className="flex justify-center mt-4">
+                  <ArrowLeft className="w-4 h-4 text-rose-400 mr-1" />
+                  <a 
+                    href="/" 
+                    className="text-sm text-rose-500 hover:text-rose-600 transition-colors duration-200"
+                  >
+                    Return to Gallery
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <Footer />
+        <ExpirationBanner />
+      </div>
+    );
+  }
+
+  // Admin panel content remains the same
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-pink-50 p-4 relative">
       {/* Decorative elements */}
